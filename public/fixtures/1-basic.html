@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DVE Fixture 1 — Basic Interface</title>
+<style>
+  :root { --ink:#12181f; --muted:#5b6b7c; --line:#dbe3ea; --brand:#0b6b5f; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:#f6f8fa; }
+  header { display:flex; align-items:center; gap:24px; padding:14px 28px; background:#fff; border-bottom:1px solid var(--line); }
+  nav a { color:var(--muted); text-decoration:none; margin-right:18px; }
+  nav a[aria-current="page"] { color:var(--brand); font-weight:600; }
+  main { max-width:960px; margin:28px auto; padding:0 20px; }
+  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin:20px 0 32px; }
+  .card { background:#fff; border:1px solid var(--line); border-radius:10px; padding:16px; }
+  button { font:inherit; padding:8px 14px; border-radius:8px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  button.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+  button[disabled] { opacity:.5; cursor:not-allowed; }
+  form { background:#fff; border:1px solid var(--line); border-radius:10px; padding:18px; display:grid; gap:12px; max-width:520px; }
+  label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
+  input, select, textarea { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; }
+  .row { display:flex; gap:12px; align-items:center; }
+  footer { padding:24px 28px; color:var(--muted); border-top:1px solid var(--line); margin-top:40px; background:#fff; }
+  #status { min-height:22px; color:var(--brand); font-size:13px; }
+</style>
+</head>
+<body>
+<header>
+  <strong>Northwind Academy</strong>
+  <nav aria-label="Primary">
+    <a href="#dashboard" aria-current="page">Dashboard</a>
+    <a href="#students">Students</a>
+    <a href="#courses">Courses</a>
+    <a href="#reports">Reports</a>
+  </nav>
+  <button id="add-student" class="primary" style="margin-left:auto">Add Student</button>
+</header>
+
+<main>
+  <h1>Dashboard</h1>
+  <p>A deliberately plain page used to validate baseline DVE recognition.</p>
+
+  <section class="cards" aria-label="Summary cards">
+    <article class="card"><h2>Students</h2><p>1,204 enrolled</p><button data-card="students">View students</button></article>
+    <article class="card"><h2>Courses</h2><p>38 active</p><button data-card="courses">View courses</button></article>
+    <article class="card"><h2>Staff</h2><p>72 members</p><button data-card="staff" disabled>Locked</button></article>
+  </section>
+
+  <h2 id="enrol">Enrolment form</h2>
+  <form id="enrolment">
+    <div><label for="full-name">Full name</label><input id="full-name" name="fullName" placeholder="Jane Doe" required /></div>
+    <div><label for="email">Email</label><input id="email" name="email" type="email" placeholder="jane@example.com" /></div>
+    <div><label for="programme">Programme</label>
+      <select id="programme" name="programme">
+        <option value="cs">Computer Science</option>
+        <option value="math">Mathematics</option>
+        <option value="bio">Biology</option>
+      </select>
+    </div>
+    <div><label for="notes">Notes</label><textarea id="notes" name="notes" rows="3"></textarea></div>
+    <div class="row"><input type="checkbox" id="scholarship" style="width:auto" /><label for="scholarship" style="margin:0">Apply for scholarship</label></div>
+    <fieldset style="border:1px solid var(--line);border-radius:8px">
+      <legend>Study mode</legend>
+      <div class="row"><input type="radio" id="mode-full" name="mode" value="full" checked style="width:auto" /><label for="mode-full" style="margin:0">Full time</label></div>
+      <div class="row"><input type="radio" id="mode-part" name="mode" value="part" style="width:auto" /><label for="mode-part" style="margin:0">Part time</label></div>
+    </fieldset>
+    <div class="row"><button type="submit" class="primary">Submit enrolment</button><button type="button" id="reset-form">Reset</button></div>
+    <p id="status" role="status" aria-live="polite"></p>
+  </form>
+</main>
+
+<footer>
+  <a href="#privacy">Privacy</a> · <a href="#terms">Terms</a> · <a href="#contact">Contact</a>
+</footer>
+
+<script>
+  document.getElementById('enrolment').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = document.getElementById('full-name').value || 'student';
+    document.getElementById('status').textContent = 'Enrolled ' + name;
+  });
+  document.getElementById('reset-form').addEventListener('click', function () {
+    document.getElementById('enrolment').reset();
+    document.getElementById('status').textContent = '';
+  });
+  document.getElementById('add-student').addEventListener('click', function () {
+    document.getElementById('full-name').focus();
+  });
+</script>
+</body>
+</html>

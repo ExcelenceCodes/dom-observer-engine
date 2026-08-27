@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DVE Fixture 2 — Complex Dashboard</title>
+<style>
+  :root { --ink:#0f1720; --muted:#63748a; --line:#e2e8f0; --brand:#4338ca; --bg:#f8fafc; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 system-ui,sans-serif; color:var(--ink); background:var(--bg); }
+  .app { display:grid; grid-template-columns:236px 1fr; min-height:100vh; }
+  aside { background:#0f1720; color:#cbd5e1; padding:16px 12px; position:sticky; top:0; height:100vh; overflow:auto; }
+  aside.collapsed { width:64px; }
+  aside h2 { font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:#64748b; margin:18px 8px 6px; }
+  aside a, aside button.navitem { display:block; width:100%; text-align:left; color:#cbd5e1; text-decoration:none; padding:7px 10px; border-radius:7px; background:none; border:0; font:inherit; cursor:pointer; }
+  aside a:hover, aside button.navitem:hover { background:#1e293b; color:#fff; }
+  .submenu { margin-left:12px; border-left:1px solid #1e293b; padding-left:8px; }
+  .submenu[hidden] { display:none; }
+  header.topbar { display:flex; gap:12px; align-items:center; padding:12px 20px; background:#fff; border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; }
+  main { padding:20px; }
+  .filters { display:flex; flex-wrap:wrap; gap:10px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:12px; margin-bottom:16px; }
+  input, select { padding:7px 9px; border:1px solid var(--line); border-radius:7px; font:inherit; }
+  button { font:inherit; padding:7px 12px; border-radius:7px; border:1px solid var(--line); background:#fff; cursor:pointer; }
+  button.primary { background:var(--brand); color:#fff; border-color:var(--brand); }
+  .grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; }
+  .dropdown { position:relative; display:inline-block; }
+  .menu { position:absolute; right:0; top:110%; background:#fff; border:1px solid var(--line); border-radius:8px; min-width:170px; box-shadow:0 8px 24px rgba(15,23,42,.12); padding:4px; z-index:20; }
+  .menu[hidden] { display:none; }
+  .menu button { display:block; width:100%; text-align:left; border:0; background:none; padding:7px 9px; border-radius:6px; }
+  .menu button:hover { background:#eef2ff; }
+  .tabs { display:flex; gap:4px; margin-bottom:10px; }
+  .tabs button[aria-selected="true"] { background:#eef2ff; color:var(--brand); border-color:#c7d2fe; }
+  @media (max-width:900px) { .app { grid-template-columns:1fr; } .grid { grid-template-columns:1fr; } aside { position:static; height:auto; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside id="sidebar" aria-label="Sidebar navigation">
+    <strong style="color:#fff">Atlas Ops</strong>
+    <h2>Overview</h2>
+    <a href="#overview">Home</a>
+    <a href="#activity">Activity</a>
+    <h2>Operations</h2>
+    <button class="navitem" aria-expanded="false" aria-controls="menu-fleet" id="fleet-toggle">Fleet ▸</button>
+    <div class="submenu" id="menu-fleet" hidden>
+      <a href="#vehicles">Vehicles</a>
+      <a href="#drivers">Drivers</a>
+      <button class="navitem" aria-expanded="false" aria-controls="menu-maint" id="maint-toggle">Maintenance ▸</button>
+      <div class="submenu" id="menu-maint" hidden>
+        <a href="#scheduled">Scheduled</a>
+        <a href="#incidents">Incidents</a>
+      </div>
+    </div>
+    <button class="navitem" aria-expanded="false" aria-controls="menu-billing" id="billing-toggle">Billing ▸</button>
+    <div class="submenu" id="menu-billing" hidden>
+      <a href="#invoices">Invoices</a>
+      <a href="#payouts">Payouts</a>
+    </div>
+    <h2>Admin</h2>
+    <a href="#settings">Settings</a>
+    <a href="#members">Members</a>
+  </aside>
+
+  <div>
+    <header class="topbar">
+      <button id="toggle-sidebar" aria-label="Collapse sidebar">☰</button>
+      <input id="global-search" type="search" placeholder="Search fleet…" aria-label="Global search" style="flex:1;max-width:380px" />
+      <div class="dropdown" style="margin-left:auto">
+        <button id="account-menu" aria-haspopup="menu" aria-expanded="false">Account ▾</button>
+        <div class="menu" id="account-menu-list" role="menu" hidden>
+          <button role="menuitem">Profile</button>
+          <button role="menuitem">Preferences</button>
+          <button role="menuitem" id="signout">Sign out</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <h1>Fleet dashboard</h1>
+      <section class="filters" aria-label="Filters">
+        <select id="region" aria-label="Region"><option>All regions</option><option>North</option><option>South</option></select>
+        <select id="status-filter" aria-label="Status"><option>Any status</option><option>Active</option><option>Grounded</option></select>
+        <input id="from-date" type="date" aria-label="From date" />
+        <input id="to-date" type="date" aria-label="To date" />
+        <button class="primary" id="apply-filters">Apply filters</button>
+        <button id="clear-filters">Clear</button>
+      </section>
+
+      <div class="tabs" role="tablist" aria-label="Dataset">
+        <button role="tab" aria-selected="true" id="tab-vehicles">Vehicles</button>
+        <button role="tab" aria-selected="false" id="tab-drivers">Drivers</button>
+        <button role="tab" aria-selected="false" id="tab-routes">Routes</button>
+      </div>
+
+      <div class="grid">
+        <section class="panel" aria-label="Vehicles table">
+          <table>
+            <caption style="text-align:left;color:var(--muted);padding-bottom:6px">Active vehicles</caption>
+            <thead><tr><th>ID</th><th>Model</th><th>Region</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </section>
+        <aside class="panel" aria-label="Utilisation">
+          <h2 style="margin-top:0;font-size:15px">Utilisation</h2>
+          <ul><li>Peak: 92%</li><li>Average: 71%</li><li>Idle units: 8</li></ul>
+          <button id="export">Export CSV</button>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  var data = [
+    ['VH-1001','Sprinter','North','Active'], ['VH-1002','Transit','South','Grounded'],
+    ['VH-1003','Crafter','North','Active'], ['VH-1004','Hiace','East','Active'],
+    ['VH-1005','Daily','South','Active'], ['VH-1006','Master','West','Grounded']
+  ];
+  var tbody = document.getElementById('rows');
+  data.forEach(function (row, i) {
+    var tr = document.createElement('tr');
+    tr.innerHTML = '<td>' + row[0] + '</td><td>' + row[1] + '</td><td>' + row[2] + '</td><td>' + row[3] + '</td>';
+    var td = document.createElement('td');
+    var edit = document.createElement('button'); edit.textContent = 'Edit'; edit.id = 'edit-' + i;
+    var del = document.createElement('button'); del.textContent = 'Remove'; del.id = 'remove-' + i;
+    del.addEventListener('click', function () { tr.remove(); });
+    td.appendChild(edit); td.appendChild(del); tr.appendChild(td); tbody.appendChild(tr);
+  });
+
+  function toggle(btnId, menuId) {
+    var b = document.getElementById(btnId), m = document.getElementById(menuId);
+    b.addEventListener('click', function () {
+      var open = b.getAttribute('aria-expanded') === 'true';
+      b.setAttribute('aria-expanded', String(!open));
+      m.hidden = open;
+    });
+  }
+  toggle('fleet-toggle','menu-fleet'); toggle('maint-toggle','menu-maint');
+  toggle('billing-toggle','menu-billing'); toggle('account-menu','account-menu-list');
+  document.getElementById('toggle-sidebar').addEventListener('click', function () {
+    var app = document.querySelector('.app');
+    app.style.gridTemplateColumns = app.style.gridTemplateColumns === '64px 1fr' ? '236px 1fr' : '64px 1fr';
+  });
+  document.querySelectorAll('[role=tab]').forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      document.querySelectorAll('[role=tab]').forEach(function (t) { t.setAttribute('aria-selected','false'); });
+      tab.setAttribute('aria-selected','true');
+    });
+  });
+</script>
+</body>
+</html>
