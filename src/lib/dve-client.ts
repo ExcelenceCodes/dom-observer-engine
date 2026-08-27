@@ -164,7 +164,7 @@ export function parseCommand(input: string): { op: "observe" | "query" | "detail
     const type = singular(key);
     const band = /in (top|bottom|left|right) (\d+)%?/i.exec(arg);
     const spec: QuerySpec = { visible: true };
-    if (type) spec.type = type as QuerySpec["type"];
+    if (type) spec.type = type as NonNullable<QuerySpec["type"]>;
     if (band) spec.viewport = { band: String(band[1]).toLowerCase() as "top", pct: Number(band[2]) };
     return { op: "query", payload: spec };
   }
