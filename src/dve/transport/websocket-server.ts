@@ -1,3 +1,4 @@
+import type { DVERequest } from "../core/types";
 import { WebSocketServer, type WebSocket } from "ws";
 import type { DVETransport, TransportHandler } from "./transport";
 import type { DVEEvent } from "../core/types";
@@ -25,7 +26,7 @@ export function webSocketTransport(opts: { port?: number; host?: string } = {}):
           try {
             const json = JSON.parse(String(raw));
             parsedId = typeof json?.id === "number" ? json.id : 0;
-            const request = requestSchema.parse(json);
+            const request = requestSchema.parse(json) as unknown as DVERequest;
             const response = await handler(request);
             socket.send(JSON.stringify(response));
           } catch (error) {

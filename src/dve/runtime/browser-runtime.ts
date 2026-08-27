@@ -63,7 +63,7 @@ export class BrowserRuntime {
     // injected agent never leak into another browser profile or application.
     this.context = await this.browser.newContext({
       viewport,
-      userAgent: this.config.browser?.userAgent,
+      ...(this.config.browser?.userAgent ? { userAgent: this.config.browser.userAgent } : {}),
       bypassCSP: false,
       serviceWorkers: "block",
     });
@@ -156,7 +156,7 @@ export class BrowserRuntime {
         name: frame.name(),
         parentFrameId: frame.parentFrame() ? this.frameIdOf(frame.parentFrame()!) : null,
         accessible,
-        boundary,
+        ...(boundary ? { boundary } : {}),
         offset,
       });
     }
@@ -197,8 +197,9 @@ export class BrowserRuntime {
     const result = (await frame.evaluate(
       ([cmd, list]) => {
         const api = (window as unknown as Record<string, Record<string, (...a: unknown[]) => unknown>>)["__dve"];
-        if (!api || typeof api[cmd as string] !== "function") return null;
-        return api[cmd as string](...(list as unknown[]));
+        const fn = api ? api[cmd as string] : undefined;
+        if (typeof fn !== "function") return null;
+        return fn(...(list as unknown[]));
       },
       [command, args] as [string, unknown[]],
     )) as T;

@@ -145,7 +145,7 @@ export function parseCommand(input: string): { op: "observe" | "query" | "detail
   if (!line) return { error: "empty command" };
   const [head, ...rest] = line.split(/\s+/);
   const arg = rest.join(" ");
-  const cmd = head.toLowerCase();
+  const cmd = (head ?? "").toLowerCase();
 
   const observeMap: Record<string, ObserveSpec> = {
     summary: { kind: "summary" },
@@ -163,8 +163,9 @@ export function parseCommand(input: string): { op: "observe" | "query" | "detail
     // "observe buttons", "observe buttons in top 50%"
     const type = singular(key);
     const band = /in (top|bottom|left|right) (\d+)%?/i.exec(arg);
-    const spec: QuerySpec = { type: type as QuerySpec["type"], visible: true };
-    if (band) spec.viewport = { band: band[1].toLowerCase() as "top", pct: Number(band[2]) };
+    const spec: QuerySpec = { visible: true };
+    if (type) spec.type = type as NonNullable<QuerySpec["type"]>;
+    if (band) spec.viewport = { band: String(band[1]).toLowerCase() as "top", pct: Number(band[2]) };
     return { op: "query", payload: spec };
   }
 
