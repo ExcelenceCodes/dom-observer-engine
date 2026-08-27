@@ -9,7 +9,9 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "dve:server": "bun run server/dve-server.ts",
+    "test": "vitest run"
   },
   "overrides": {
     "rolldown": "1.2.1"
