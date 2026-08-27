@@ -234,7 +234,7 @@ export class ActionEngine {
       return {
         ok: true,
         action: action.kind,
-        target,
+        ...(target ? { target } : {}),
         delta: this.lastDelta,
         durationMs: Date.now() - started,
         cost: this.runtime.snapshotCost(),
@@ -244,7 +244,7 @@ export class ActionEngine {
       return {
         ok: false,
         action: action.kind,
-        target,
+        ...(target ? { target } : {}),
         durationMs: Date.now() - started,
         cost: this.runtime.snapshotCost(),
         error: { code: err.code, message: err.message },
